@@ -2,41 +2,51 @@ import express from "express";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import cors from "cors";
-
 import path from "path";
 
 import { connectDB } from "./lib/db.js";
-
 import authRoutes from "./routes/auth.route.js";
 import messageRoutes from "./routes/message.route.js";
 import { app, server } from "./lib/socket.js";
 
 dotenv.config();
 
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 5001; // Default port is set to 5001
 const __dirname = path.resolve();
 
 app.use(express.json());
 app.use(cookieParser());
+
+// Set up CORS configuration
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: process.env.FRONTEND_URL || "http://localhost:5173", // Use an environment variable for production
     credentials: true,
   })
 );
 
+// API Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/messages", messageRoutes);
 
+// Serve React frontend in production
 if (process.env.NODE_ENV === "production") {
-  app.use(express.static(path.join(__dirname, "../frontend/dist")));
+  const frontendPath = path.join(__dirname, "../frontend/dist"); // Adjust if using "build" for CRA
+  app.use(express.static(frontendPath));
 
   app.get("*", (req, res) => {
-    res.sendFile(path.join(__dirname, "../frontend", "dist", "index.html"));
+    res.sendFile(path.join(frontendPath, "index.html"));
   });
 }
 
-server.listen(PORT, () => {
-  console.log("server is running on PORT:" + PORT);
-  connectDB();
+// Start server and connect to the database
+server.listen(PORT, async () => {
+  console.log(`Server is running on PORT: ${PORT}`);
+  try {
+    await connectDB();
+    console.log("Database connected successfully!");
+  } catch (error) {
+    console.error("Database connection failed:", error.message);
+    process.exit(1); // Exit the process if the DB connection fails
+  }
 });
