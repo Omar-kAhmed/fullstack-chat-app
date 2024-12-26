@@ -21,6 +21,7 @@ app.use(cookieParser());
 app.use(
   cors({
     origin: "https://fullstack-chat-app-front.onrender.com",
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true,
   })
 );
