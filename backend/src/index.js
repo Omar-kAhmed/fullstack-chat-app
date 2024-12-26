@@ -20,7 +20,9 @@ app.use(cookieParser());
 // Set up CORS configuration
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || "http://localhost:5173", // Use an environment variable for production
+
+    origin: "https://fullstack-chat-app-front.onrender.com",
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true,
   })
 );
